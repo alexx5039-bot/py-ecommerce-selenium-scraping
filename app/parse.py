@@ -24,6 +24,14 @@ class Product:
     num_of_reviews: int
 
 
+def accept_cookies(driver: WebDriver) -> None:
+    try:
+        cookie_button = driver.find_element(By.ID, "cookie-accept")
+        cookie_button.click()
+    except NoSuchElementException:
+        pass
+
+
 def click_more_until_end(driver: WebDriver) -> None:
     wait = WebDriverWait(driver, 10)
 
@@ -76,17 +84,15 @@ def parse_products(driver: WebDriver) -> None:
 
         price_text = card.find_element(By.CSS_SELECTOR, ".price").text
         price = float(price_text.replace("$", ""))
-        rating = str(
-            len(
+        rating = len(
                 card.find_elements(
                     By.CSS_SELECTOR,
                     ".ratings .ws-icon-star"
                 )
             )
-        )
 
         reviews = card.find_elements(By.CSS_SELECTOR, "p.pull-right")
-        num_of_reviews = reviews[0].text.split()[0] if reviews else "0"
+        num_of_reviews = int(reviews[0].text.split()[0]) if reviews else 0
 
         products.append(
             Product(
@@ -120,7 +126,7 @@ def get_all_products() -> None:
         for name, path in pages.items():
             url = urljoin(HOME_URL, path)
             driver.get(url)
-
+            accept_cookies(driver)
             if name in pages_with_more_button:
                 click_more_until_end(driver)
 
